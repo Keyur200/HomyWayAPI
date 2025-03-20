@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using HomyWayAPI.DTO;
 using HomyWayAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,16 +24,23 @@ namespace HomyWayAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(User user)
+        public async Task<IActionResult> Register(UserDTO userdto)
         {
-            if (_context.Users.Any(u => u.Name == user.Name)) return BadRequest("User already exists");
+            if (_context.Users.Any(u => u.Name == userdto.Name)) return BadRequest("User already exists");
+            var groupExists =await _context.Groups.AnyAsync(g=>g.Id == userdto.Gid);
+            if (!groupExists)
+            {
+                return BadRequest("Invalid Group ID");
+            }
 
             var nuser = new User
             {
-                Name = user.Name,
-                Email = user.Email,
-                Phone = user.Phone,
-                Password = BCrypt.Net.BCrypt.HashPassword(user.Password)
+                Id = Guid.NewGuid(),
+                Name = userdto.Name,
+                Email = userdto.Email,
+                Phone = userdto.Phone,
+                Password = BCrypt.Net.BCrypt.HashPassword(userdto.Password),
+                Gid = userdto.Gid,
             };
 
             _context.Users.Add(nuser);
@@ -43,14 +51,14 @@ namespace HomyWayAPI.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login(User users)
+        public IActionResult Login(LoginDTO users)
         {
             var Jwt = _config.GetSection("Jwt");
             var user = _context.Users.SingleOrDefault(u => u.Email == users.Email); 
             if (user == null || !BCrypt.Net.BCrypt.Verify(users.Password, user.Password)) return Unauthorized("Invalid credentials");
 
             var token = GenerateJwtToken(users.Email);
-            return Ok(new { token, user.Name });
+            return Ok(new { token, user = new { user.Name, user.Email, user.Phone, user.Gid } });
 
         }
 
