@@ -10,7 +10,8 @@ namespace HomyWayAPI.Controllers
     {
 
         [HttpGet]
-        [Authorize]
+        //[Authorize]
+        [Authorize(Roles = "1")]
         public IActionResult getData()
         {
             var name = User.Identity?.Name;

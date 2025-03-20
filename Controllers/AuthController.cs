@@ -68,9 +68,12 @@ namespace HomyWayAPI.Controllers
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var user = _context.Users.FirstOrDefault(u => u.Email == username);
+
             var claims = new[]
             {
             new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.Role, user.Gid.ToString()),
         };
 
             var token = new JwtSecurityToken(
