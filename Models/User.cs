@@ -5,7 +5,7 @@ namespace HomyWayAPI.Models;
 
 public partial class User
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string Name { get; set; } = null!;
 
@@ -17,5 +17,5 @@ public partial class User
 
     public int Gid { get; set; }
 
-    public virtual Group GidNavigation { get; set; } = null!;
+    public virtual ICollection<PropertyTbl> PropertyTbls { get; set; } = new List<PropertyTbl>();
 }

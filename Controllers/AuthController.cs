@@ -35,7 +35,7 @@ namespace HomyWayAPI.Controllers
 
             var nuser = new User
             {
-                Id = Guid.NewGuid(),
+                Id = 0, // Assuming Id is auto-incremented by the database
                 Name = userdto.Name,
                 Email = userdto.Email,
                 Phone = userdto.Phone,
