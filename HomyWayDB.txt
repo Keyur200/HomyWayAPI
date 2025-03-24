@@ -1,0 +1,51 @@
+//GROUP TABLE
+
+CREATE TABLE [dbo].[groups](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[name] [nvarchar](max) NULL
+);
+
+
+//USER TABLE
+
+CREATE TABLE [dbo].[users](
+	[id] [Int] IDENTITY(1,1) NOT NULL,
+	[name] [nvarchar](100) NOT NULL,
+	[email] [nvarchar](100) NOT NULL,
+	[password] [nvarchar](255) NOT NULL,
+	[phone] [nvarchar](20) NOT NULL,
+	[Gid] [int] NOT NULL
+);
+
+
+// CATEGORY TABLE
+
+CREATE TABLE [dbo].[property_categoryTBL] (
+    [category_id]   INT          IDENTITY (1, 1) NOT NULL,
+    [category_name] VARCHAR (50) NOT NULL,
+    CONSTRAINT [PK_property_categoryTBL] PRIMARY KEY CLUSTERED ([category_id] ASC)
+);
+
+
+// PROPERTY TABLE
+
+CREATE TABLE [dbo].[propertyTBL] (
+    [property_id]          INT             IDENTITY (1, 1) NOT NULL,
+    [host_id]              INT             NOT NULL,
+    [property_name]        VARCHAR (100)   NOT NULL,
+    [property_description] VARCHAR (500)   NULL,
+    [property_adderss]     VARCHAR (500)   NOT NULL,
+    [property_city]        VARCHAR (50)    NOT NULL,
+    [property_state]       VARCHAR (50)    NOT NULL,
+    [property_country]     VARCHAR (50)    NOT NULL,
+    [max_guests]           INT             NOT NULL,
+    [bed_room]             INT             NOT NULL,
+    [bed]                  INT             NOT NULL,
+    [bathroom]             INT             NOT NULL,
+    [status]               VARCHAR (50)    NOT NULL,
+    [property_price]       DECIMAL (18, 2) NOT NULL,
+    [category_id]          INT             NOT NULL,
+    CONSTRAINT [PK_propertyTBL] PRIMARY KEY CLUSTERED ([property_id] ASC),
+    CONSTRAINT [FK_propertyTBL_property_categoryTBL] FOREIGN KEY ([category_id]) REFERENCES [dbo].[property_categoryTBL] ([category_id]),
+    CONSTRAINT [FK_propertyTBL_users] FOREIGN KEY ([host_id]) REFERENCES [dbo].[users] ([id])
+);

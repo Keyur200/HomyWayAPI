@@ -45,14 +45,17 @@ namespace HomyWayAPI.Controllers
         // PUT: api/PropertyCategoryTbls/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPropertyCategoryTbl(int id, PropertyCategoryTbl propertyCategoryTbl)
+        public async Task<IActionResult> PutPropertyCategoryTbl(int id, CategoryDTO categoryDTO)
         {
-            if (id != propertyCategoryTbl.CategoryId)
+           
+            var existingCategory = await _context.PropertyCategoryTbls.FindAsync(id);
+            if (existingCategory == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(propertyCategoryTbl).State = EntityState.Modified;
+            // Update the existing entity with the DTO data
+            existingCategory.CategoryName = categoryDTO.CategoryName;
 
             try
             {
@@ -72,6 +75,7 @@ namespace HomyWayAPI.Controllers
 
             return NoContent();
         }
+
 
         // POST: api/PropertyCategoryTbls
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
