@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HomyWayAPI.Models;
 using HomyWayAPI.DTO;
+using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
+using System.Text.Json;
 
 namespace HomyWayAPI.Controllers
 {
@@ -15,24 +18,26 @@ namespace HomyWayAPI.Controllers
     public class PropertyController : ControllerBase
     {
         private readonly HomyWayContext _context;
-
-        public PropertyController(HomyWayContext context)
+        private readonly CloudinaryDotNet.Cloudinary _cloudinary;
+        public PropertyController(HomyWayContext context, CloudinaryDotNet.Cloudinary cloudinary)
         {
             _context = context;
+            _cloudinary = cloudinary;
         }
 
         // GET: api/Property
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PropertyTbl>>> GetPropertyTbls()
+        public async Task<IActionResult> GetPropertyTbls()
         {
-            return await _context.PropertyTbls.ToListAsync();
+            var property  = await _context.PropertyTbls.Include(p => p.ImagesNavigation).Include(c => c.Category).Include(h => h.Host).ToListAsync();
+            return Ok(property);
         }
 
         // GET: api/Property/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PropertyTbl>> GetPropertyTbl(int id)
         {
-            var propertyTbl = await _context.PropertyTbls.FindAsync(id);
+            var propertyTbl = await _context.PropertyTbls.Include(p => p.ImagesNavigation).Include(c => c.Category).Include(h => h.Host).FirstOrDefaultAsync(p => p.PropertyId == id);
 
             if (propertyTbl == null)
             {
@@ -89,10 +94,15 @@ namespace HomyWayAPI.Controllers
         }
 
         // POST: api/Property
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //
+        // +To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<PropertyTbl>> PostPropertyTbl(PropertyDTO propertyDTO)
         {
+            //if(propertyDTO.files == null || propertyDTO.files.Count == 0)
+            //{
+            //    return BadRequest();
+            //}
             var newProperty = new PropertyTbl
             {
                 HostId = propertyDTO.HostId,
@@ -109,10 +119,42 @@ namespace HomyWayAPI.Controllers
                 Status = propertyDTO.Status,
                 PropertyPrice = propertyDTO.PropertyPrice,
                 CategoryId = propertyDTO.CategoryId,
-                
             };
             _context.PropertyTbls.Add(newProperty);
             await _context.SaveChangesAsync();
+
+            var images = new List<int>();
+
+            foreach(var file in propertyDTO.files)
+            {
+                using var stream = file.OpenReadStream();
+                var upload = new ImageUploadParams()
+                {
+                    File = new CloudinaryDotNet.FileDescription(file.FileName, stream),
+                    Folder = "HomyWayImages"
+                };
+
+                var uploadResult = await _cloudinary.UploadAsync(upload);
+
+                if(uploadResult.Error != null)
+                {
+                    return BadRequest(uploadResult.Error.Message);
+                }
+
+                var image = new Image
+                {
+                    ImageUrl = uploadResult.SecureUrl.ToString(),
+                    PropertId = newProperty.PropertyId,
+                };
+
+                _context.Images.Add(image);
+                await _context.SaveChangesAsync();
+                images.Add(image.Id);
+            }
+
+            newProperty.Images = JsonSerializer.Serialize(images);
+            _context.PropertyTbls.Update(newProperty);
+            await _context.SaveChangesAsync();   
 
             return CreatedAtAction("GetPropertyTbl", new { id = newProperty.PropertyId }, newProperty);
         }

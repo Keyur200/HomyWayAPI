@@ -35,7 +35,11 @@ public partial class PropertyTbl
 
     public int CategoryId { get; set; }
 
+    public string? Images { get; set; }
+
     public virtual PropertyCategoryTbl Category { get; set; } = null!;
 
     public virtual User Host { get; set; } = null!;
+
+    public virtual ICollection<Image> ImagesNavigation { get; set; } = new List<Image>();
 }

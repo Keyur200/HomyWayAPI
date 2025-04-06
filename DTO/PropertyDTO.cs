@@ -3,6 +3,7 @@
     public class PropertyDTO
     {
 
+        public int PropertyId { get; set; }
         public int HostId { get; set; }
 
         public string PropertyName { get; set; } = null!;
@@ -30,5 +31,8 @@
         public decimal PropertyPrice { get; set; }
 
         public int CategoryId { get; set; }
+
+
+        public List<IFormFile> files { get; set; }
     }
 }
