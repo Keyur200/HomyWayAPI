@@ -23,6 +23,13 @@ namespace HomyWayAPI.Controllers
             _config = configuration;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await _context.Users.ToListAsync();
+            return Ok(users);
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserDTO userdto)
         {

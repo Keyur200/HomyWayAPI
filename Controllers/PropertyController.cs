@@ -47,6 +47,13 @@ namespace HomyWayAPI.Controllers
             return propertyTbl;
         }
 
+        [HttpGet("host/{id}")]
+        public async Task<ActionResult<PropertyTbl>> GetPropertyByHost(int id)
+        {
+            var property = await _context.PropertyTbls.Include(p => p.ImagesNavigation).Include(c => c.Category).Include(h => h.Host).Where(p => p.HostId == id).ToListAsync();
+            return Ok(property);
+        }
+
         // PUT: api/Property/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
