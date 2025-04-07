@@ -170,12 +170,13 @@ namespace HomyWayAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePropertyTbl(int id)
         {
-            var propertyTbl = await _context.PropertyTbls.FindAsync(id);
+            var propertyTbl = await _context.PropertyTbls.Include(p => p.ImagesNavigation).FirstOrDefaultAsync(p => p.PropertyId == id);
             if (propertyTbl == null)
             {
                 return NotFound();
             }
 
+            _context.Images.RemoveRange(propertyTbl.ImagesNavigation);
             _context.PropertyTbls.Remove(propertyTbl);
             await _context.SaveChangesAsync();
 
