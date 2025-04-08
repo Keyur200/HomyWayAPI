@@ -15,6 +15,8 @@ public partial class HomyWayContext : DbContext
     {
     }
 
+    public virtual DbSet<Booking> Bookings { get; set; }
+
     public virtual DbSet<Group> Groups { get; set; }
 
     public virtual DbSet<Image> Images { get; set; }
@@ -31,15 +33,40 @@ public partial class HomyWayContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Booking>(entity =>
+        {
+            entity.ToTable("bookings");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Amount).HasColumnName("amount");
+            entity.Property(e => e.Checkkin).HasColumnName("checkkin");
+            entity.Property(e => e.Checkout).HasColumnName("checkout");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.Guests).HasColumnName("guests");
+            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Nights).HasColumnName("nights");
+            entity.Property(e => e.Phone).HasColumnName("phone");
+            entity.Property(e => e.PropertyId).HasColumnName("propertyId");
+            entity.Property(e => e.UserId).HasColumnName("userId");
+
+            entity.HasOne(d => d.Property).WithMany(p => p.Bookings)
+                .HasForeignKey(d => d.PropertyId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_bookings_propertyTBL");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Bookings)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_bookings_users");
+        });
+
         modelBuilder.Entity<Group>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("groups");
+            entity.ToTable("groups");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedOnAdd()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name).HasColumnName("name");
         });
 
@@ -131,9 +158,7 @@ public partial class HomyWayContext : DbContext
         {
             entity.ToTable("users");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .HasColumnName("email");

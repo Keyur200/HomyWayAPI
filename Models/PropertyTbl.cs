@@ -37,6 +37,8 @@ public partial class PropertyTbl
 
     public string? Images { get; set; }
 
+    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
     public virtual PropertyCategoryTbl Category { get; set; } = null!;
 
     public virtual User Host { get; set; } = null!;

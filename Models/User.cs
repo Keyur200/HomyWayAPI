@@ -17,5 +17,7 @@ public partial class User
 
     public int Gid { get; set; }
 
+    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
     public virtual ICollection<PropertyTbl> PropertyTbls { get; set; } = new List<PropertyTbl>();
 }
