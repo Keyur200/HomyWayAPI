@@ -15,9 +15,13 @@ public partial class User
 
     public string Phone { get; set; } = null!;
 
+    public string? Status { get; set; }
+
     public int Gid { get; set; }
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+    public virtual Group GidNavigation { get; set; } = null!;
 
     public virtual ICollection<PropertyTbl> PropertyTbls { get; set; } = new List<PropertyTbl>();
 }

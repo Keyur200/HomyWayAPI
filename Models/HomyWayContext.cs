@@ -29,7 +29,7 @@ public partial class HomyWayContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=Keyur\\SQLEXPRESS01;Initial Catalog=HomyWay;Integrated Security=True;Encrypt=True;Trust Server Certificate=True");
+        => optionsBuilder.UseSqlServer("Data Source=DESKTOP-757AVSO\\SQLEXPRESS;Initial Catalog=HomyWay;Integrated Security=True;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -58,7 +58,6 @@ public partial class HomyWayContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_bookings_users");
         });
 
@@ -150,7 +149,6 @@ public partial class HomyWayContext : DbContext
 
             entity.HasOne(d => d.Host).WithMany(p => p.PropertyTbls)
                 .HasForeignKey(d => d.HostId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_propertyTBL_users");
         });
 
@@ -171,6 +169,13 @@ public partial class HomyWayContext : DbContext
             entity.Property(e => e.Phone)
                 .HasMaxLength(20)
                 .HasColumnName("phone");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasColumnName("status");
+
+            entity.HasOne(d => d.GidNavigation).WithMany(p => p.Users)
+                .HasForeignKey(d => d.Gid)
+                .HasConstraintName("FK_users_users");
         });
 
         OnModelCreatingPartial(modelBuilder);

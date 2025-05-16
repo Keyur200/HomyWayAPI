@@ -1,0 +1,2 @@
+1) yash:-
+Data Source=DESKTOP-757AVSO\SQLEXPRESS;Initial Catalog=HomyWay;Integrated Security=True;Encrypt=False
