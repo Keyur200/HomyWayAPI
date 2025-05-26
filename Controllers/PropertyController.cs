@@ -126,6 +126,9 @@ namespace HomyWayAPI.Controllers
                 Status = propertyDTO.Status,
                 PropertyPrice = propertyDTO.PropertyPrice,
                 CategoryId = propertyDTO.CategoryId,
+                Latitude = propertyDTO.Latitude,
+                Longitude = propertyDTO.Longitude,
+                Amenities = JsonSerializer.Serialize(propertyDTO.Amenities),
             };
             _context.PropertyTbls.Add(newProperty);
             await _context.SaveChangesAsync();
@@ -177,6 +180,7 @@ namespace HomyWayAPI.Controllers
             }
 
             _context.Images.RemoveRange(propertyTbl.ImagesNavigation);
+            _context.Bookings.RemoveRange(propertyTbl.Bookings);
             _context.PropertyTbls.Remove(propertyTbl);
             await _context.SaveChangesAsync();
 

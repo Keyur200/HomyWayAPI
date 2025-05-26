@@ -37,6 +37,12 @@ public partial class PropertyTbl
 
     public string? Images { get; set; }
 
+    public string? Latitude { get; set; }
+
+    public string? Longitude { get; set; }
+
+    public string? Amenities { get; set; }
+
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
     public virtual PropertyCategoryTbl Category { get; set; } = null!;

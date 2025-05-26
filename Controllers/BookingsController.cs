@@ -28,6 +28,13 @@ namespace HomyWayAPI.Controllers
             return await _context.Bookings.ToListAsync();
         }
 
+        [HttpGet("total/{hostId}")]
+        public async Task<ActionResult<long>> getAllEarnings(int hostId)
+        {
+            var earning = await _context.Bookings.Where(b=>b.Property.HostId == hostId).SumAsync(b=>(long?)b.Amount)??0;
+            return Ok(earning);
+        }
+
         // GET: api/Bookings/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Booking>> GetBooking(int id)

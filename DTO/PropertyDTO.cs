@@ -32,6 +32,11 @@
 
         public int CategoryId { get; set; }
 
+        public string? Latitude { get; set; }
+
+        public string? Longitude { get; set; }
+
+        public List<int> Amenities { get; set; }
 
         public List<IFormFile> files { get; set; }
     }

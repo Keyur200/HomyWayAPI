@@ -15,6 +15,8 @@ public partial class HomyWayContext : DbContext
     {
     }
 
+    public virtual DbSet<Amenity> Amenities { get; set; }
+
     public virtual DbSet<Booking> Bookings { get; set; }
 
     public virtual DbSet<Group> Groups { get; set; }
@@ -29,10 +31,18 @@ public partial class HomyWayContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=DESKTOP-757AVSO\\SQLEXPRESS;Initial Catalog=HomyWay;Integrated Security=True;Encrypt=False");
+        => optionsBuilder.UseSqlServer("Data Source=Keyur\\SQLEXPRESS01;Initial Catalog=HomyWay;Integrated Security=True;Encrypt=True;Trust Server Certificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Amenity>(entity =>
+        {
+            entity.ToTable("amenities");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name).HasColumnName("name");
+        });
+
         modelBuilder.Entity<Booking>(entity =>
         {
             entity.ToTable("bookings");
@@ -58,6 +68,7 @@ public partial class HomyWayContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_bookings_users");
         });
 
@@ -103,12 +114,15 @@ public partial class HomyWayContext : DbContext
             entity.ToTable("propertyTBL");
 
             entity.Property(e => e.PropertyId).HasColumnName("property_id");
+            entity.Property(e => e.Amenities).HasColumnName("amenities");
             entity.Property(e => e.Bathroom).HasColumnName("bathroom");
             entity.Property(e => e.Bed).HasColumnName("bed");
             entity.Property(e => e.BedRoom).HasColumnName("bed_room");
             entity.Property(e => e.CategoryId).HasColumnName("category_id");
             entity.Property(e => e.HostId).HasColumnName("host_id");
             entity.Property(e => e.Images).HasColumnName("images");
+            entity.Property(e => e.Latitude).HasColumnName("latitude");
+            entity.Property(e => e.Longitude).HasColumnName("longitude");
             entity.Property(e => e.MaxGuests).HasColumnName("max_guests");
             entity.Property(e => e.PropertyAdderss)
                 .HasMaxLength(500)
@@ -149,6 +163,7 @@ public partial class HomyWayContext : DbContext
 
             entity.HasOne(d => d.Host).WithMany(p => p.PropertyTbls)
                 .HasForeignKey(d => d.HostId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_propertyTBL_users");
         });
 
@@ -172,10 +187,6 @@ public partial class HomyWayContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasColumnName("status");
-
-            entity.HasOne(d => d.GidNavigation).WithMany(p => p.Users)
-                .HasForeignKey(d => d.Gid)
-                .HasConstraintName("FK_users_users");
         });
 
         OnModelCreatingPartial(modelBuilder);
