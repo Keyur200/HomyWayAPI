@@ -55,6 +55,52 @@ namespace HomyWayAPI.Controllers
             return Ok(property);
         }
 
+        [HttpGet("category/{id}")]
+        public async Task<ActionResult<PropertyTbl>> GetPropertyByCategory(int id)
+        {
+            var property = await _context.PropertyTbls.Include(p => p.ImagesNavigation).Include(c => c.Category).Include(h => h.Host).Where(p => p.CategoryId == id).ToListAsync();
+
+            return Ok(property);
+        }
+
+
+        //All filter api 
+
+        [HttpGet("filter")]
+        public async Task<ActionResult<List<PropertyTbl>>> GetFilteredProperties(
+            [FromQuery] int? category,
+            [FromQuery] decimal? minPrice,
+    [FromQuery] decimal? maxPrice,
+    [FromQuery] string? city)
+        {
+            var query = _context.PropertyTbls
+                .Include(p => p.ImagesNavigation)
+                .Include(p => p.Category)
+                .Include(p => p.Host)
+                .Where(p => p.CategoryId == category)
+                .AsQueryable();
+
+            // If neither filter is provided, return all properties
+            if (!minPrice.HasValue && !maxPrice.HasValue && string.IsNullOrEmpty(city))
+            {
+                var allProps = await query.ToListAsync();
+                return Ok(allProps);
+            }
+            
+            // Build an OR filter
+            query = query.Where(p =>
+           
+                (minPrice.HasValue && maxPrice.HasValue && p.PropertyPrice >= minPrice.Value &&  p.PropertyPrice <= maxPrice.Value) ||
+                (!string.IsNullOrEmpty(city) && p.PropertyCity == city) 
+            );
+
+            var result = await query.ToListAsync();
+
+            return Ok(result);
+        }
+
+
+
         // PUT: api/Property/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
