@@ -35,6 +35,13 @@ namespace HomyWayAPI.Controllers
             return Ok(earning);
         }
 
+        [HttpGet("host/{hostId}")]
+        public async Task<ActionResult<long>> getAllBookingByHostId(int hostId)
+        {
+            var booking = await _context.Bookings.Include(b => b.Property).Where(b => b.Property.HostId == hostId).ToListAsync();
+            return Ok(booking);
+        }
+
         // GET: api/Bookings/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Booking>> GetBooking(int id)

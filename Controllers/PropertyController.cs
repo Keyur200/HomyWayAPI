@@ -10,6 +10,7 @@ using HomyWayAPI.DTO;
 using CloudinaryDotNet.Actions;
 using CloudinaryDotNet;
 using System.Text.Json;
+using Humanizer;
 
 namespace HomyWayAPI.Controllers
 {
@@ -57,15 +58,16 @@ namespace HomyWayAPI.Controllers
         // PUT: api/Property/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPropertyTbl(int id, PropertyDTO propertyDTO)
+        public async Task<ActionResult<PropertyTbl>> PutPropertyTbl(int id, PropertyDTO propertyDTO)
         {
-            
             var existingProperty = await _context.PropertyTbls.FindAsync(id);
             if (existingProperty == null)
             {
-                return NotFound("Property is not Found!");
+                return NotFound($"No property found with ID {id}");
             }
 
+            // Update property fields
+            existingProperty.HostId = propertyDTO.HostId;
             existingProperty.PropertyName = propertyDTO.PropertyName;
             existingProperty.PropertyDescription = propertyDTO.PropertyDescription;
             existingProperty.PropertyAdderss = propertyDTO.PropertyAdderss;
@@ -79,25 +81,47 @@ namespace HomyWayAPI.Controllers
             existingProperty.Status = propertyDTO.Status;
             existingProperty.PropertyPrice = propertyDTO.PropertyPrice;
             existingProperty.CategoryId = propertyDTO.CategoryId;
+            existingProperty.Latitude = propertyDTO.Latitude;
+            existingProperty.Longitude = propertyDTO.Longitude;
+            existingProperty.Amenities = JsonSerializer.Serialize(propertyDTO.Amenities);
 
-            try
+            // Optional: Remove existing images (if updating images completely)
+            var existingImages = JsonSerializer.Deserialize<List<int>>(existingProperty.Images ?? "[]");
+
+            // Handle new image uploads
+            foreach (var file in propertyDTO.files)
             {
-                
+                using var stream = file.OpenReadStream();
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(file.FileName, stream),
+                    Folder = "HomyWayImages"
+                };
+
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                if (uploadResult.Error != null)
+                {
+                    return BadRequest(uploadResult.Error.Message);
+                }
+
+                var newImage = new Image
+                {
+                    PropertId = id,
+                    ImageUrl = uploadResult.SecureUrl.ToString()
+                };
+
+                _context.Images.Add(newImage);
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PropertyTblExists(id))
-                {
-                    return NotFound("Property not exist!");
-                }
-                else
-                {
-                    throw;
-                }
+
+                existingImages.Add(newImage.Id);
             }
 
-            return NoContent();
+            // Update property image list
+            existingProperty.Images = JsonSerializer.Serialize(existingImages);
+            _context.PropertyTbls.Update(existingProperty);
+            await _context.SaveChangesAsync();
+
+            return Ok(existingProperty);
         }
 
         // POST: api/Property
