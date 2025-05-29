@@ -48,6 +48,19 @@ namespace HomyWayAPI.Controllers
             return propertyTbl;
         }
 
+        [HttpGet("slugName/{slug}")]
+        public async Task<ActionResult<PropertyTbl>> GetPropertyBySlug(string slug)
+        {
+            var propertyTbl = await _context.PropertyTbls.Include(p => p.ImagesNavigation).Include(c => c.Category).Include(h => h.Host).FirstOrDefaultAsync(p => p.SlugName.ToString() == slug.ToString());
+
+            if (propertyTbl == null)
+            {
+                return NotFound();
+            }
+
+            return propertyTbl;
+        }
+
         [HttpGet("host/{id}")]
         public async Task<ActionResult<PropertyTbl>> GetPropertyByHost(int id)
         {
@@ -115,6 +128,7 @@ namespace HomyWayAPI.Controllers
             // Update property fields
             existingProperty.HostId = propertyDTO.HostId;
             existingProperty.PropertyName = propertyDTO.PropertyName;
+            existingProperty.SlugName = GenerateSlug(propertyDTO.PropertyName);
             existingProperty.PropertyDescription = propertyDTO.PropertyDescription;
             existingProperty.PropertyAdderss = propertyDTO.PropertyAdderss;
             existingProperty.PropertyCity = propertyDTO.PropertyCity;
@@ -184,6 +198,7 @@ namespace HomyWayAPI.Controllers
             {
                 HostId = propertyDTO.HostId,
                 PropertyName = propertyDTO.PropertyName,
+                SlugName = GenerateSlug(propertyDTO.PropertyName),
                 PropertyDescription = propertyDTO.PropertyDescription,
                 PropertyAdderss = propertyDTO.PropertyAdderss,
                 PropertyCity = propertyDTO.PropertyCity,
@@ -238,6 +253,19 @@ namespace HomyWayAPI.Controllers
 
             return CreatedAtAction("GetPropertyTbl", new { id = newProperty.PropertyId }, newProperty);
         }
+
+        private string GenerateSlug(string phrase)
+        {
+            string str = phrase.ToLowerInvariant();
+            // Remove all invalid characters
+            str = System.Text.RegularExpressions.Regex.Replace(str, @"[^a-z0-9\s-]", "");
+            // Convert multiple spaces into one space
+            str = System.Text.RegularExpressions.Regex.Replace(str, @"\s+", " ").Trim();
+            // Replace spaces with hyphens
+            str = str.Replace(" ", "-");
+            return str;
+        }
+
 
         // DELETE: api/Property/5
         [HttpDelete("{id}")]

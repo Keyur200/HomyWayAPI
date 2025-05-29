@@ -11,6 +11,8 @@ public partial class PropertyTbl
 
     public string PropertyName { get; set; } = null!;
 
+    public string? SlugName { get; set; }
+
     public string? PropertyDescription { get; set; }
 
     public string PropertyAdderss { get; set; } = null!;
