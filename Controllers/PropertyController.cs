@@ -254,6 +254,46 @@ namespace HomyWayAPI.Controllers
             return CreatedAtAction("GetPropertyTbl", new { id = newProperty.PropertyId }, newProperty);
         }
 
+        [HttpGet("TestDelete")]
+        public async Task<IActionResult> TestDelete()
+        {
+            var publicId = "HomyWayImages/xjymw7fcw7xxhuzg7uzl";
+
+            var deletionParams = new DeletionParams(publicId);
+            var result = await _cloudinary.DestroyAsync(deletionParams);
+
+            return Ok(result);
+        }
+
+
+        [HttpDelete("DeleteImage/{id}")]
+        public async Task<IActionResult> DeleteImage(int id)
+        {
+            var image = await _context.Images.FindAsync(id);
+            if (image == null)
+                return NotFound("Image not found.");
+
+            var property = await _context.PropertyTbls.FindAsync(image.PropertId);
+            if (property == null)
+                return NotFound("Related property not found.");
+
+            var imageIds = JsonSerializer.Deserialize<List<int>>(property.Images ?? "[]");
+
+            imageIds.Remove(id);
+
+            property.Images = JsonSerializer.Serialize(imageIds);
+            _context.PropertyTbls.Update(property);
+
+            _context.Images.Remove(image);
+
+            await _context.SaveChangesAsync();
+
+            return Ok("Image deleted from database and property updated.");
+        }
+
+
+
+
         private string GenerateSlug(string phrase)
         {
             string str = phrase.ToLowerInvariant();
