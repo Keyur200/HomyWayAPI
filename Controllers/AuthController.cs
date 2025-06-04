@@ -95,6 +95,18 @@ namespace HomyWayAPI.Controllers
             return Ok("User status updated successfully");
         }
 
+        [HttpPatch("updateUser/{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromQuery] string name, [FromQuery] string phone, [FromQuery] string email)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound("User not found");
+            user.Email = email;
+            user.Name = name;
+            user.Phone = phone;
+            await _context.SaveChangesAsync();
+            return Ok("User updated successfully");
+        }
+
         //generate jwt token code
         private string GenerateJwtToken(string username)
         {

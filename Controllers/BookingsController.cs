@@ -56,6 +56,18 @@ namespace HomyWayAPI.Controllers
             return booking;
         }
 
+        //Get: api/Bookings/property/{propertyId}
+        [HttpGet("property/{propertyId}")]
+        public async Task<ActionResult<IEnumerable<Booking>>> GetBookingsByPropertyId(int propertyId)
+        {
+            var bookings = await _context.Bookings.Where(b => b.PropertyId == propertyId).ToListAsync();
+            if (bookings == null || !bookings.Any())
+            {
+                return NotFound();
+            }
+            return bookings;
+        }
+
         // PUT: api/Bookings/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
