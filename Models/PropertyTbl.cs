@@ -11,8 +11,6 @@ public partial class PropertyTbl
 
     public string PropertyName { get; set; } = null!;
 
-    public string? SlugName { get; set; }
-
     public string? PropertyDescription { get; set; }
 
     public string PropertyAdderss { get; set; } = null!;
@@ -44,6 +42,8 @@ public partial class PropertyTbl
     public string? Longitude { get; set; }
 
     public string? Amenities { get; set; }
+
+    public string? SlugName { get; set; }
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
