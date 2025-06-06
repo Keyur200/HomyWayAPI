@@ -21,7 +21,9 @@ public partial class User
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public virtual Group GidNavigation { get; set; } = null!;
-
     public virtual ICollection<PropertyTbl> PropertyTbls { get; set; } = new List<PropertyTbl>();
+
+    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
 }

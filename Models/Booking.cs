@@ -27,6 +27,8 @@ public partial class Booking
 
     public DateTime CreatedAt { get; set; }
 
+    public long? HomywayCharges { get; set; }
+
     public virtual PropertyTbl Property { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;

@@ -11,6 +11,8 @@ public partial class PropertyTbl
 
     public string PropertyName { get; set; } = null!;
 
+    public string? SlugName { get; set; }
+
     public string? PropertyDescription { get; set; }
 
     public string PropertyAdderss { get; set; } = null!;
@@ -43,8 +45,6 @@ public partial class PropertyTbl
 
     public string? Amenities { get; set; }
 
-    public string? SlugName { get; set; }
-
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
     public virtual PropertyCategoryTbl Category { get; set; } = null!;
@@ -52,4 +52,8 @@ public partial class PropertyTbl
     public virtual User Host { get; set; } = null!;
 
     public virtual ICollection<Image> ImagesNavigation { get; set; } = new List<Image>();
+
+    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
 }

@@ -23,5 +23,7 @@
         public long Amount { get; set; }
 
         public DateTime CreatedAt { get; set; }
+
+        public long? HomywayCharges { get; set; }
     }
 }

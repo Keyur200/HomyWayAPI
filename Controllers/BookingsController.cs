@@ -25,13 +25,20 @@ namespace HomyWayAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
         {
-            return await _context.Bookings.ToListAsync();
+            return await _context.Bookings.Include(p => p.Property).Include(b => b.Property.ImagesNavigation).ToListAsync();
         }
 
         [HttpGet("total/{hostId}")]
         public async Task<ActionResult<long>> getAllEarnings(int hostId)
         {
             var earning = await _context.Bookings.Where(b=>b.Property.HostId == hostId).SumAsync(b=>(long?)b.Amount)??0;
+            return Ok(earning);
+        }
+
+        [HttpGet("adminEarnings")]
+        public async Task<ActionResult<long>> getAllEarningsOfAdmin()
+        {
+            var earning = await _context.Bookings.SumAsync(b => (long?)b.HomywayCharges) ?? 0;
             return Ok(earning);
         }
 
@@ -42,6 +49,12 @@ namespace HomyWayAPI.Controllers
             return Ok(booking);
         }
 
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<Booking>> getAllBookingByUser(int userId)
+        {
+            var bookings = await _context.Bookings.Include(p=>p.Property).Include(b=>b.Property.ImagesNavigation).Where(b=>b.UserId == userId).OrderByDescending(b => b.Checkkin).ToListAsync();
+            return Ok(bookings);    
+        }
         // GET: api/Bookings/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Booking>> GetBooking(int id)
@@ -116,6 +129,7 @@ namespace HomyWayAPI.Controllers
                 Phone = booking.Phone,
                 Amount = booking.Amount,
                 CreatedAt = DateTime.Now,
+                HomywayCharges = booking.HomywayCharges,
             };
             _context.Bookings.Add(b);
             await _context.SaveChangesAsync();
