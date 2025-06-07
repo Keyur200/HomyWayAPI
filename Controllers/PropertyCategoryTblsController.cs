@@ -42,6 +42,19 @@ namespace HomyWayAPI.Controllers
             return propertyCategoryTbl;
         }
 
+        [HttpGet("name/{name}")]
+        public async Task<ActionResult<PropertyCategoryTbl>> GetPropertyCategoryTbl(string name)
+        {
+            var propertyCategoryTbl = await _context.PropertyCategoryTbls.FirstOrDefaultAsync(c=>c.CategoryName==name);
+
+            if (propertyCategoryTbl == null)
+            {
+                return NotFound();
+            }
+
+            return propertyCategoryTbl;
+        }
+
         // PUT: api/PropertyCategoryTbls/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
