@@ -265,6 +265,58 @@ namespace HomyWayAPI.Controllers
             return Ok(result);
         }
 
+        [HttpGet("Status/pending")]
+        public async Task<ActionResult<List<PropertyTbl>>> GetPropertiesByStatusPending()
+        {
+            var properties = await _context.PropertyTbls
+                .Include(p => p.ImagesNavigation)
+                .Include(c => c.Category)
+                .Include(h => h.Host)
+                .Where(p => p.Status == "pending")
+                .ToListAsync();
+            if (properties == null || !properties.Any())
+            {
+                return NotFound($"No properties found with status 'Pending'");
+            }
+            return Ok(properties);
+        }
+
+        [HttpGet("Status/active")]
+        public async Task<ActionResult<List<PropertyTbl>>> GetPropertiesByStatusActive()
+        {
+            var properties = await _context.PropertyTbls
+                .Include(p => p.ImagesNavigation)
+                .Include(c => c.Category)
+                .Include(h => h.Host)
+                .Where(p => p.Status == "active")
+                .ToListAsync();
+            if (properties == null || !properties.Any())
+            {
+                return NotFound($"No properties found with status 'Active'");
+            }
+            return Ok(properties);
+        }
+
+        
+
+        [HttpPut("Status/{status}")]
+        public async Task<IActionResult> UpdatePropertyStatus(int id, string status)
+        {
+            var property = await _context.PropertyTbls.FindAsync(id);
+            if (property == null)
+            {
+                return NotFound($"No property found with ID {id}");
+            }
+            if (status != "active" && status != "pending")
+            {
+                return BadRequest("Invalid status. Allowed values are 'active' or 'pending'.");
+            }
+            property.Status = status;
+            _context.PropertyTbls.Update(property);
+            await _context.SaveChangesAsync();
+            return Ok(property);
+        }
+
 
         [HttpDelete("DeleteImage/{id}")]
         public async Task<IActionResult> DeleteImage(int id)
