@@ -69,6 +69,66 @@ namespace HomyWayAPI.Controllers
             return booking;
         }
 
+        [HttpGet("weekly-earnings")]
+        public IActionResult GetWeeklyEarnings()
+        {
+            DateTime today = DateTime.UtcNow.Date;
+            DateTime weekAgo = today.AddDays(-6); // Includes today + past 6 days
+
+            var earnings = _context.Bookings
+                .Where(b => b.CreatedAt.Date >= weekAgo && b.CreatedAt.Date <= today)
+                .AsEnumerable() // switch to LINQ-to-Objects for Date-only grouping
+                .GroupBy(b => b.CreatedAt.Date)
+                .Select(g => new
+                {
+                    Date = g.Key.ToString("yyyy-MM-dd"),
+                    TotalEarnings = g.Sum(x => x.HomywayCharges)
+                })
+                .ToList();
+
+            // Ensure all 7 days are present
+            var fullWeek = Enumerable.Range(0, 7)
+                .Select(i => weekAgo.AddDays(i))
+                .Select(day => new
+                {
+                    Date = day.ToString("yyyy-MM-dd"),
+                    TotalEarnings = earnings.FirstOrDefault(e => e.Date == day.ToString("yyyy-MM-dd"))?.TotalEarnings ?? 0
+                });
+
+            return Ok(fullWeek);
+        }
+
+        [HttpGet("weekly-host-earnings/{hostId}")]
+        public IActionResult GetWeeklyEarningsForHost(int hostId)
+        {
+            DateTime today = DateTime.UtcNow.Date;
+            DateTime weekAgo = today.AddDays(-6);
+
+            var earnings = _context.Bookings
+                .Where(b => b.CreatedAt.Date >= weekAgo && b.CreatedAt.Date <= today)
+                .Where(b => b.Property.HostId == hostId)
+                .Include(b => b.Property) // Ensure Property is joined
+                .AsEnumerable() // so we can use Date-only
+                .GroupBy(b => b.CreatedAt.Date)
+                .Select(g => new
+                {
+                    Date = g.Key.ToString("yyyy-MM-dd"),
+                    TotalEarnings = g.Sum(x => x.Amount)
+                })
+                .ToList();
+
+            // Fill missing days
+            var fullWeek = Enumerable.Range(0, 7)
+                .Select(i => weekAgo.AddDays(i))
+                .Select(day => new
+                {
+                    Date = day.ToString("yyyy-MM-dd"),
+                    TotalEarnings = earnings.FirstOrDefault(e => e.Date == day.ToString("yyyy-MM-dd"))?.TotalEarnings ?? 0
+                });
+
+            return Ok(fullWeek);
+        }
+
         //Get: api/Bookings/property/{propertyId}
         [HttpGet("property/{propertyId}")]
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookingsByPropertyId(int propertyId)
